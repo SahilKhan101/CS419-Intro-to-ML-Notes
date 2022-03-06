@@ -1,0 +1,196 @@
+%
+% This is the LaTeX template file for lecture notes for CS294-8,
+% Computational Biology for Computer Scientists.  When preparing 
+% LaTeX notes for this class, please use this template.
+%
+% To familiarize yourself with this template, the body contains
+% some examples of its use.  Look them over.  Then you can
+% run LaTeX on this file.  After you have LaTeXed this file then
+% you can look over the result either by printing it out with
+% dvips or using xdvi.
+%
+% This template is based on the template for Prof. Sinclair's CS 270.
+
+\documentclass[11pt, twosides]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{xcolor}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+%   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CS 419M Introduction to Machine Learning
+                        \hfill Spring 2021-22} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+% \renewcommand{\cite}[1]{[#1]}
+% \def\beginrefs{\begin{list}%
+%         {[\arabic{equation}]}{\usecounter{equation}
+%          \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+%          \setlength{\labelwidth}{1.6truecm}}}
+% \def\endrefs{\end{list}}
+% \def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+% \newcommand{\fig}[3]{
+% 			\vspace{#2}
+% 			\begin{center}
+% 			Figure \thelecnum.#1:~#3
+% 			\end{center}
+% 	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+% \newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{10}{Regression Loss Function Duality}{Abir De}{Group 2}
+%\lecture{x}{Title}{Abir De}{Group y}
+
+\section{Recap}
+
+\subsection{Why is Bias Term not Regularised?}
+
+For the loss function given as
+\begin{eqnarray*}
+    F_{D}(W) &=& \Sigma_{i\in D}[l(w^Tx_i+b,y_i)+\lambda||w||^2]
+    \end{eqnarray*}
+Bias term b is usually not regularised.
+This gives a default value of prediction when no data is provided for training the model.
+
+If the loss function is not regularised with respect to bias term, the loss function not stable, As the minimum of the eigenvalue of hessian of loss function is 0. Meaning the loss function is not strictly convex.
+
+\begin{eqnarray*}
+    min\  eig \left( \frac{\partial^2 F}{\partial b^2} \right) = 0 \Rightarrow F(w,b) \ is \ not \ strictly \ convex
+    \end{eqnarray*}
+
+\section{Regression Dual Formulation}
+
+Optimization model for support vector machine 
+\begin{eqnarray*}
+    \underset{w,b}{min} \ \ ||w||^2 + C\Sigma_{i\in D}[1-(w^Tx_i+b)y_i)]\ , \ where \ C = \frac{1}{\lambda}
+    \end{eqnarray*}
+
+can be equivalently written in the form
+
+    $$\underset{w,b,\zeta_i \geq 0}{min} \ ||w||^2 + \underset{i\in D}{\Sigma}C \zeta_i $$
+    $$y_i(w^Tx_i+b)\geq 1-\zeta_i \ \ \forall \ i\in D$$
+    
+This problem in constrained space can be converted to unconstrained dual, which is given as\\
+$$ \underset{\alpha_i \geq 0, \beta_i \geq 0}{max} \ \underset{w,b,\zeta \geq 0}{min} \ \ ||w||^2+ \underset{i\in D}{\Sigma} \left[ C\zeta_i +\alpha_i(1-\zeta_i-y_i(w^Tx_i+b))-\beta_i\zeta_i\right]$$
+
+
+\section{Simplifying Dual Equation}
+
+Take $F_{w,b,\zeta} = ||w||^2+ \underset{i\in D}{\Sigma} \left[ C\zeta_i +\alpha_i(1-\zeta_i-y_i(w^Tx_i+b))-\beta_i\zeta_i\right]$
+
+Now, $$\frac{\partial F_{w,b,\zeta}}{\partial w} = 2w - y_{i}\underset{i\in D}{\Sigma}x_{i}\alpha_{i} = 0 $$
+
+$$ w = \frac{\underset{i\in D}{\Sigma}x_{i}\alpha_{i}y_{i}}{2} \hspace{1em}.....(i)$$
+
+$$ \frac{\partial F_{w,b,\zeta}}{\partial b} = 0 \Rightarrow \underset{i\in D}{\Sigma}\alpha_{i}y_{i} = 0 \hspace{1em}.....(ii)$$
+
+$$ \frac{\partial F_{w,b,\zeta}}{\partial \zeta} = 0 \Rightarrow c-\alpha_{i}-\beta{i} = 0 $$
+
+$$ \alpha_{i}+\beta{i}=c \hspace{1em}.....(iii) $$
+
+Putting these relations, above dual equation becomes:
+
+$$ \underset{\alpha_i \geq 0}{max}  \ \ \underset{i\in D}{\Sigma} \alpha_{i} - \frac{1}{4} \underset{i\in D , j\in D}{\Sigma}\alpha_{i}\alpha_{j}x_{i}^{T}x_{j}y_{i}y_{j} $$
+
+$\underset{i\in D}{\Sigma} \alpha_{i} - \frac{1}{4} \underset{i\in D , j\in D}{\Sigma}\alpha_{i}\alpha_{j}x_{i}^{T}x_{j}y_{i}y_{j}$ is concave. And as $\alpha_{i}+\beta{i}=c$ and $\beta_{i}\geq0$, so $0\leq\alpha_{i}\leq c$
+
+
+
+\section{Applying Constainsts and Conditions}
+
+From Slatu's condition, following two conditions must be satisfied:
+\begin{equation}
+ \alpha_{i}( (w^T x_{i} + b)y_{i}-1+\zeta_{i}) =0
+\end{equation}
+
+\begin{equation}
+ \beta_{i}\zeta_{i} = 0
+\end{equation}
+    
+Let's consider some cases: \\
+
+(i) $y_{i}(w^T x_{i} + b)>1$ for some $(x_{i},y_{i}), \alpha_{i}=?$   \\
+Ans. As $\beta_{i}\geq0 \ \Rightarrow \ \zeta_{i}=0 \ \Rightarrow \ \alpha_{i}=0$
+
+(ii) $y_{i}(w^T x_{i} + b)<1$ for some $(x_{i},y_{i}), \alpha_{i}=?$   \\
+Ans. As $\zeta_{i}>0$ (from $eq^n$ 10.1) $ \ \Rightarrow \ \beta_{i}=0 $ (from $eq^n$ 10.2) $ \Rightarrow \ \alpha_{i}=c $ (as $\alpha_{i}+\beta_{i}=c$)
+
+(iii) $y_{i}(w^T x_{i} + b)=1$ for some $(x_{i},y_{i}), \alpha_{i}=?$   \\
+Ans. As $ \alpha_{i}\zeta_{i}=0 $ (from $eq^n$ 10.1) $ \ \Rightarrow \ \zeta_{i}=0 $ (using $eq^n$ 10.2)  \& As $ \beta_{i}\geq0 \ \Rightarrow \ 0<\alpha\leq c $ (as $\alpha_{i}+\beta_{i}=c$)
+
+
+\section{Group Details and Individual Contribution}
+% Fill this part
+
+\begin{itemize}
+    \item 200020112 Sahil Khan
+    \item 190040120 Sumeet Ranjan
+    \item 200040038 Chaitanya Langde
+    \item 19B080018 Prateek Kumar
+\end{itemize}
+
+\end{document}
